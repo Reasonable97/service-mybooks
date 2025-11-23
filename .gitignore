@@ -1,1 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+.venv
+
+# Node/React
+node_modules/
+build/
+dist/
+.env.local
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
 .DS_Store
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
