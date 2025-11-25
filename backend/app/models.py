@@ -52,8 +52,8 @@ class Book(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=True)
 
     # Связи "многие ко многим" к Author и Genre через промежуточные таблицы
-    authors = relationship("BookAuthor", back_populates="book")
-    genres = relationship("BookGenre", back_populates="book")
+    authors = relationship("BookAuthor", back_populates="book", cascade="all, delete-orphan")
+    genres = relationship("BookGenre", back_populates="book", cascade="all, delete-orphan")
 
 
 class BookAuthor(Base):

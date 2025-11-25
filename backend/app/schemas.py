@@ -11,6 +11,15 @@ class AuthorBase(BaseModel):
     bio: Optional[str] = Field(None, max_length=5000)
 
 
+class AuthorBrief(BaseModel):
+    """Краткая информация об авторе для списков"""
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True
+
+
 class AuthorCreate(AuthorBase):
     pass
 
@@ -31,6 +40,15 @@ class GenreBase(BaseModel):
     description: Optional[str] = Field(None, max_length=2000)
 
 
+class GenreBrief(BaseModel):
+    """Краткая информация о жанре для списков"""
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True
+
+
 class GenreCreate(GenreBase):
     pass
 
@@ -49,6 +67,37 @@ class Genre(GenreBase):
 class BookBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=500)
     year: Optional[int] = Field(None, ge=1000, le=2100)
+
+
+class BookBrief(BookBase):
+    """Упрощённая схема книги для списков (без bio, created_at, updated_at в authors/genres)"""
+    id: int
+    title: str
+    year: Optional[int] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    authors: List[AuthorBrief] = []
+    genres: List[GenreBrief] = []
+
+    class Config:
+        from_attributes = True
+
+    @model_validator(mode='before')
+    @classmethod
+    def extract_nested_data(cls, data):
+        """Преобразует промежуточные таблицы в конечные объекты"""
+        if isinstance(data, dict):
+            return data
+        
+        return {
+            'id': data.id,
+            'title': data.title,
+            'year': data.year,
+            'created_at': data.created_at,
+            'updated_at': data.updated_at,
+            'authors': [ba.author for ba in data.authors],
+            'genres': [bg.genre for bg in data.genres],
+        }
 
 
 class BookCreate(BookBase):
@@ -121,8 +170,8 @@ class PaginatedResponse(BaseModel):
 
 
 class BookListResponse(PaginatedResponse):
-    """Ответ со списком книг"""
-    items: List[Book] = Field(default_factory=list, description="Список книг")
+    """Ответ со списком книг (упрощённый формат)"""
+    items: List[BookBrief] = Field(default_factory=list, description="Список книг")
 
 
 class AuthorListResponse(PaginatedResponse):
