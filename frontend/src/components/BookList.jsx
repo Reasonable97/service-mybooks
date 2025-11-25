@@ -1,20 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { getBooks, deleteBook } from '../services/api';
+import BookForm from './BookForm';
 import '../styles/BookList.css';
+
 
 const BookList = () => {
   const [books, setBooks] = useState([]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false); // Состояние для показа формы
+  const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState(null);
 
   const pageSize = 10;
 
+
   useEffect(() => {
     fetchBooks();
   }, [page]);
+
 
   const fetchBooks = async () => {
     try {
@@ -29,6 +33,7 @@ const BookList = () => {
     }
   };
 
+
   const handleDelete = async (id) => {
     if (window.confirm('Вы уверены?')) {
       try {
@@ -40,14 +45,33 @@ const BookList = () => {
     }
   };
 
+
   if (loading) return <div>Загрузка...</div>;
   if (error) return <div className="error">{error}</div>;
 
+
   const totalPages = Math.ceil(total / pageSize);
+
 
   return (
     <div className="book-list">
-      <h1>Книги</h1>
+      <div className="books-header">
+        <h1>Книги</h1>
+        <button className="btn btn-primary" onClick={() => setShowForm(true)}>
+          + Добавить книгу
+        </button>
+      </div>
+
+      {showForm && (
+        <BookForm
+          onSuccess={() => {
+            setShowForm(false);
+            fetchBooks();
+          }}
+          onClose={() => setShowForm(false)}
+        />
+      )}
+
       <div className="books-grid">
         {books.map((book) => (
           <div key={book.id} className="book-card">
@@ -72,6 +96,7 @@ const BookList = () => {
         ))}
       </div>
 
+
       {/* Пагинация */}
       <div className="pagination">
         <button
@@ -93,5 +118,6 @@ const BookList = () => {
     </div>
   );
 };
+
 
 export default BookList;

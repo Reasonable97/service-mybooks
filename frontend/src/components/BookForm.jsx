@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { createBook, updateBook, getAuthors, getGenres } from '../services/api';
 import '../styles/BookForm.css';
 
-const BookForm = ({ bookId, onSuccess }) => {
+
+const BookForm = ({ bookId, onSuccess, onClose }) => {
   const [title, setTitle] = useState('');
   const [year, setYear] = useState('');
   const [authorIds, setAuthorIds] = useState([]);
@@ -12,9 +13,11 @@ const BookForm = ({ bookId, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+
   useEffect(() => {
     fetchDropdownData();
   }, []);
+
 
   const fetchDropdownData = async () => {
     try {
@@ -27,9 +30,11 @@ const BookForm = ({ bookId, onSuccess }) => {
     }
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
 
     const bookData = {
       title,
@@ -37,6 +42,7 @@ const BookForm = ({ bookId, onSuccess }) => {
       author_ids: authorIds,
       genre_ids: genreIds,
     };
+
 
     try {
       if (bookId) {
@@ -52,72 +58,86 @@ const BookForm = ({ bookId, onSuccess }) => {
     }
   };
 
+
   return (
-    <form onSubmit={handleSubmit} className="book-form">
-      <h2>{bookId ? 'Редактировать книгу' : 'Создать новую книгу'}</h2>
+    <div className="modal-overlay" onClick={onClose}> {/* ← div для модального окна */}
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}> {/* ← Предотвращает закрытие при клике на форму */}
+        <form onSubmit={handleSubmit} className="book-form">
+          <div className="form-header">
+            <h2>{bookId ? 'Редактировать книгу' : 'Создать новую книгу'}</h2>
+            <button type="button" className="close-btn" onClick={onClose}>×</button>
+          </div>
 
-      {error && <div className="error">{error}</div>}
+          {error && <div className="error">{error}</div>}
 
-      <div className="form-group">
-        <label>Название:</label>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
+          <div className="form-group">
+            <label>Название:</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Год:</label>
+            <input
+              type="number"
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+              min="1000"
+              max="2100"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Авторы:</label>
+            <select
+              multiple
+              value={authorIds.map(String)}
+              onChange={(e) =>
+                setAuthorIds(Array.from(e.target.selectedOptions, (opt) => parseInt(opt.value)))
+              }
+            >
+              {authors.map((author) => (
+                <option key={author.id} value={author.id}>
+                  {author.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Жанры:</label>
+            <select
+              multiple
+              value={genreIds.map(String)}
+              onChange={(e) =>
+                setGenreIds(Array.from(e.target.selectedOptions, (opt) => parseInt(opt.value)))
+              }
+            >
+              {genres.map((genre) => (
+                <option key={genre.id} value={genre.id}>
+                  {genre.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-actions">
+            <button type="button" className="btn btn-secondary" onClick={onClose}>
+              Отмена
+            </button>
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? 'Сохранение...' : 'Сохранить'}
+            </button>
+          </div>
+        </form>
       </div>
-
-      <div className="form-group">
-        <label>Год:</label>
-        <input
-          type="number"
-          value={year}
-          onChange={(e) => setYear(e.target.value)}
-          min="1000"
-          max="2100"
-        />
-      </div>
-
-      <div className="form-group">
-        <label>Авторы:</label>
-        <select
-          multiple
-          value={authorIds.map(String)}
-          onChange={(e) =>
-            setAuthorIds(Array.from(e.target.selectedOptions, (opt) => parseInt(opt.value)))
-          }
-        >
-          {authors.map((author) => (
-            <option key={author.id} value={author.id}>
-              {author.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="form-group">
-        <label>Жанры:</label>
-        <select
-          multiple
-          value={genreIds.map(String)}
-          onChange={(e) =>
-            setGenreIds(Array.from(e.target.selectedOptions, (opt) => parseInt(opt.value)))
-          }
-        >
-          {genres.map((genre) => (
-            <option key={genre.id} value={genre.id}>
-              {genre.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <button type="submit" disabled={loading}>
-        {loading ? 'Сохранение...' : 'Сохранить'}
-      </button>
-    </form>
+    </div>
   );
 };
+
 
 export default BookForm;
