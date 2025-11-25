@@ -78,6 +78,18 @@ class Book(BookBase):
         from_attributes = True
 
 
+class AuthorUpdate(BaseModel):
+    """Схема для PATCH-обновления автора"""
+    name: Optional[str] = Field(None, min_length=1, max_length=255)
+    bio: Optional[str] = Field(None, max_length=5000)
+
+
+class GenreUpdate(BaseModel):
+    """Схема для PATCH-обновления жанра"""
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    description: Optional[str] = Field(None, max_length=2000)
+
+
 # ========== Обёртки для списковых ответов с пагинацией ==========
 
 class PaginatedResponse(BaseModel):

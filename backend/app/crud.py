@@ -66,9 +66,9 @@ def update_book(db: Session, book_id: int, book_update: schemas.BookUpdate) -> O
 
     # Обновляем основные поля, если они переданы
     if book_update.title is not None:
-        db_book.title = book_update.title
+        db_book.title = book_update.title # type: ignore
     if book_update.year is not None:
-        db_book.year = book_update.year
+        db_book.year = book_update.year # type: ignore
 
     # Обновляем авторов, если передан список
     if book_update.author_ids is not None:
@@ -100,7 +100,7 @@ def delete_book(db: Session, book_id: int) -> bool:
     return True
 
 
-# ========== Вспомогательные CRUD для авторов и жанров ==========
+# ========== CRUD для авторов (обновлено с подсчётом total) ==========
 
 def get_authors(db: Session, skip: int = 0, limit: int = 100):
     """Получить всех авторов с пагинацией"""
@@ -124,6 +124,35 @@ def create_author(db: Session, author: schemas.AuthorCreate) -> models.Author:
     return db_author
 
 
+def update_author(db: Session, author_id: int, author_update: schemas.AuthorUpdate) -> Optional[models.Author]:
+    """Частично обновить автора"""
+    db_author = db.query(models.Author).filter(models.Author.id == author_id).first()
+    if not db_author:
+        return None
+
+    if author_update.name is not None:
+        db_author.name = author_update.name  # type: ignore
+    if author_update.bio is not None:
+        db_author.bio = author_update.bio  # type: ignore
+
+    db.commit()
+    db.refresh(db_author)
+    return db_author
+
+
+def delete_author(db: Session, author_id: int) -> bool:
+    """Удалить автора"""
+    db_author = db.query(models.Author).filter(models.Author.id == author_id).first()
+    if not db_author:
+        return False
+
+    db.delete(db_author)
+    db.commit()
+    return True
+
+
+# ========== CRUD для жанров (с пагинацией) ==========
+
 def get_genres(db: Session, skip: int = 0, limit: int = 100):
     """Получить все жанры с пагинацией"""
     query = db.query(models.Genre)
@@ -144,3 +173,30 @@ def create_genre(db: Session, genre: schemas.GenreCreate) -> models.Genre:
     db.commit()
     db.refresh(db_genre)
     return db_genre
+
+
+def update_genre(db: Session, genre_id: int, genre_update: schemas.GenreUpdate) -> Optional[models.Genre]:
+    """Частично обновить жанр"""
+    db_genre = db.query(models.Genre).filter(models.Genre.id == genre_id).first()
+    if not db_genre:
+        return None
+
+    if genre_update.name is not None:
+        db_genre.name = genre_update.name  # type: ignore
+    if genre_update.description is not None:
+        db_genre.description = genre_update.description  # type: ignore
+
+    db.commit()
+    db.refresh(db_genre)
+    return db_genre
+
+
+def delete_genre(db: Session, genre_id: int) -> bool:
+    """Удалить жанр"""
+    db_genre = db.query(models.Genre).filter(models.Genre.id == genre_id).first()
+    if not db_genre:
+        return False
+
+    db.delete(db_genre)
+    db.commit()
+    return True
