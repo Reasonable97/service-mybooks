@@ -1,5 +1,6 @@
 from typing import Optional, List
 from pydantic import BaseModel, Field
+from pydantic import model_validator
 from datetime import datetime
 
 
@@ -66,7 +67,7 @@ class BookUpdate(BaseModel):
 
 class Book(BookBase):
     """Схема для чтения книги из БД"""
-    id: int  # id на первом месте
+    id: int
     title: str
     year: Optional[int] = None
     created_at: datetime
@@ -76,6 +77,18 @@ class Book(BookBase):
 
     class Config:
         from_attributes = True
+
+    @model_validator(mode='before')
+    @classmethod
+    def extract_nested_data(cls, data):
+        """Преобразует промежуточные таблицы в конечные объекты"""
+        if hasattr(data, 'authors'):
+            # Если data — SQLAlchemy объект, извлекаем авторов
+            data.authors = [ba.author for ba in data.authors]
+        if hasattr(data, 'genres'):
+            # Извлекаем жанры
+            data.genres = [bg.genre for bg in data.genres]
+        return data
 
 
 class AuthorUpdate(BaseModel):
