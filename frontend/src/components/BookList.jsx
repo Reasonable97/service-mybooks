@@ -7,6 +7,7 @@ const BookList = () => {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false); // Состояние для показа формы
   const [error, setError] = useState(null);
 
   const pageSize = 10;
