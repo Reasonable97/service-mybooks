@@ -82,13 +82,21 @@ class Book(BookBase):
     @classmethod
     def extract_nested_data(cls, data):
         """Преобразует промежуточные таблицы в конечные объекты"""
-        if hasattr(data, 'authors'):
-            # Если data — SQLAlchemy объект, извлекаем авторов
-            data.authors = [ba.author for ba in data.authors]
-        if hasattr(data, 'genres'):
-            # Извлекаем жанры
-            data.genres = [bg.genre for bg in data.genres]
-        return data
+        # Если data — dict, возвращаем как есть
+        if isinstance(data, dict):
+            return data
+        
+        # Если SQLAlchemy объект, преобразуем в dict
+        return {
+            'id': data.id,
+            'title': data.title,
+            'year': data.year,
+            'created_at': data.created_at,
+            'updated_at': data.updated_at,
+            'authors': [ba.author for ba in data.authors],  # Извлекаем авторов
+            'genres': [bg.genre for bg in data.genres],     # Извлекаем жанры
+        }
+
 
 
 class AuthorUpdate(BaseModel):
