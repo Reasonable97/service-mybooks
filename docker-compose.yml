@@ -1,0 +1,24 @@
+
+
+services:
+  backend:
+    build: ./backend         # Собираем из Dockerfile в папке backend
+    ports:
+      - "8000:8000"          # Пробрасываем порт 8000
+    volumes:
+      - ./backend/mybooks.db:/app/mybooks.db  # Сохраняем БД
+    networks:
+      - mybooks-net
+
+  frontend:
+    build: ./frontend        # Собираем из Dockerfile в папке frontend
+    ports:
+      - "3000:80"            # React на порту 3000
+    depends_on:
+      - backend              # Frontend стартует после backend
+    networks:
+      - mybooks-net
+
+networks:
+  mybooks-net:
+    driver: bridge
